@@ -1,3 +1,7 @@
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +24,24 @@ public class Router {
         return Math.random()*1000 <= probability;
     }
     public static void main(String[] args){
-
+        Socket s= null;
+        DataInputStream dis=null;
+        DataOutputStream out = null;
+        int cnt = 0;
+        // port 5000
+        try{
+            ServerSocket ss=new ServerSocket(5000);
+            while(cnt < 4){
+                s=ss.accept();//establishes connection
+                dis=new
+                        DataInputStream(s.getInputStream());
+                out = new DataOutputStream(s.getOutputStream());
+                String  str=(String)dis.readUTF();
+                System.out.println("message= "+str);
+                out.writeUTF("message from host A"+str);
+                out.flush();
+            }
+            ss.close();
+        }catch(Exception e){System.out.println(e);}
     }
 }
