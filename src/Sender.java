@@ -19,41 +19,47 @@ public class Sender {
             "ghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefgh" +
             "ijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghij" +
             "klmnopqrstuvwxyzabcdefghijklmnopqrt";
+    DataOutputStream dout= null;
+    DataInputStream in = null;
+    Socket s=null;
+    int num = 0;
     private int window_size = 0;
     private int start = 0;
     private String[] data;
     public Sender(int packet_num){
         // assume the window size is half of the number of packets
         // For selective repeat, the window size is half the maximum sequence number of the frame
+        num = packet_num;
         window_size = packet_num / 2;
         data = new String[packet_num];
         for(int i = 0; i < data.length; ++i){
             // add seq number to the end
             data[i] += (packet+i);
-            System.err.println(data[i]);
+            System.out.println(data[i]);
         }
     }
-    public static void main(String[] args){
-        DataOutputStream dout= null;
-        DataInputStream in = null;
-        Socket s=null;
+    public void communicate() throws Exception{
+        // ip & port = "192.168.0.154" & 5000
         int count = 0;
-        //需要服务器的正确的IP地址和端口号 "192.168.0.145", 5000
         try{
-            while (count < 4){
+            while(count < num){
                 s=new Socket("localhost",5000);
                 dout=new DataOutputStream(s.getOutputStream());
                 in = new DataInputStream(s.getInputStream());
-                dout.writeUTF("host A");
-                String str = (String)in.readUTF();
-                System.err.println(str);
-                System.err.println(count);
-                count++;
+                dout.writeUTF("Hello Server");
+                String str = in.readUTF();
+                System.out.println("from receiver: "+str);
                 dout.flush();
                 dout.close();
             }
-
             s.close();
         }catch(Exception e){System.out.println(e);}
     }
+    public static void main(String[] args)throws Exception{
+        // main thread start after 10 seconds
+        //Thread.sleep(10000);
+        Sender sender = new Sender(10);
+        sender.communicate();
+
+}
 }

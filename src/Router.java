@@ -1,15 +1,18 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /** NAT to transfer IP **/
 public class Router {
     // the packet sent to router will be 1494 + 6 bytes, including 747 characters of payload and header, 6 bytes for sequence number.
     // drop probability  = (0+X) * 0.001, suppose X = 5
     private static final int probability = 5;
+    Socket s= null;
+    DataInputStream dis=null;
+    DataOutputStream out = null;
     // NAT table
     // NAT table structure
     /**
@@ -23,25 +26,28 @@ public class Router {
     public boolean packet_drop() {
         return Math.random()*1000 <= probability;
     }
-    public static void main(String[] args){
-        Socket s= null;
-        DataInputStream dis=null;
-        DataOutputStream out = null;
+    public void communicate(){
         int cnt = 0;
         // port 5000
         try{
             ServerSocket ss=new ServerSocket(5000);
-            while(cnt < 4){
-                s=ss.accept();//establishes connection
-                dis=new
-                        DataInputStream(s.getInputStream());
-                out = new DataOutputStream(s.getOutputStream());
+
+            while(cnt < 5){
+                Socket s=ss.accept();//establishes connection
+                DataInputStream dis=new DataInputStream(s.getInputStream());
+                DataOutputStream out = new DataOutputStream(s.getOutputStream());
                 String  str=(String)dis.readUTF();
-                System.out.println("message= "+str);
-                out.writeUTF("message from host A"+str);
-                out.flush();
+                out.writeUTF("ACK");
+                System.out.println("from sender "+str);
+                cnt++;
             }
-            ss.close();
+            // ss.close();
         }catch(Exception e){System.out.println(e);}
     }
+    public static void main(String[] args){
+        Router router = new Router();
+        router.communicate();
+
+
+}
 }
